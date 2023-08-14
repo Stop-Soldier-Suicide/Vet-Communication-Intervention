@@ -23,7 +23,9 @@ Despite the investment of public resources to fight staggering suicide rates amo
 | R Markdown Output | R Markdown output file including code and resulting restuls.  | [HTML](VetTix_GitHub.html) <br/> [PDF](VetTix_GitHub.pdf) |
 
 
-> In order to reporduce the results presented in the research article and [R Markdown Output File](VetTix_GitHub.pdf), download the [Deidentified Data](SSS_Poll_wVAQuestions.csv) and the [R Markdown Code](VetTix_GitHub.Rmd) into the same file location. Open the R Markdown file, and click the "Knit" button on the top panel. This will create an R Markdown Output file as presented here. Alternatively, the raw code is pasted below for your convenience, and can be pasted into any R platform. Please note that the figures produced in this code were combined and formatted using "BioRender". No data was altered in the process. 
+> In order to reporduce the results presented in the research article and [R Markdown Output File](VetTix_GitHub.pdf), download the [Deidentified Data](SSS_Poll_wVAQuestions.csv) and the [R Markdown Code](VetTix_GitHub.Rmd) into the same file location. Open the R Markdown file, and click the "Knit" button on the top panel. This will create an R Markdown Output file as presented here. Alternatively, the raw code is pasted below for your convenience, and can be pasted into any R platform.
+> The HTML file is searchable and viewer friendly, however when you click on the file like, you will need to download the file to view it. The preview displays HTML code rather than the code output by default.
+> Please note that the figures produced in this code were combined and formatted using "BioRender". No data was altered in the process. 
 
 ## R Code for Analysis (raw code)
 
