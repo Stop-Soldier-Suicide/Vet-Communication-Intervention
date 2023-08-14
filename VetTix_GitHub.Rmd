@@ -1,0 +1,454 @@
+---
+title: Suicide risk communication and intervention preferences for veterans and service
+  members.
+output:
+  pdf_document: default
+  html_document: default
+date: "2023-08-14"
+---
+
+## Install Packages and Load Dataset
+```{r, results=F, warning=F, message=F}
+library(dataMaid)
+library(lubridate)
+library(summarytools)
+library(ggstatsplot)
+library(ggplot2)
+library(gridExtra)
+library(tidyr)
+library(Rmisc)
+library(ltm)
+library(ggfortify)
+library(ggpubr)
+library(factoextra)
+library(cluster)
+library(nlme)
+library(emmeans)
+library(dplyr)
+library(ggpubr)
+```
+
+```{r, results=F, warning=F, message=F}
+#load data set
+vettix<-read.csv("SSS_Poll_wVAQuestions.csv")
+```
+
+## Clean and Set Variables
+```{r, results=F, warning=F, message=F}
+#Filter data to remove respondents that were never in the military, LEO reported branch, or Space Force
+  #Space Force participants excluded due to small sample size and potential for identifiable data
+#filter data to keep only veterans and currently serving participants
+#Mutate data to create a dataframe counting all participants that took part in the SSS survey
+#Mutate data to create a dataframe counting all participants that took part in the VA survey
+table(vettix$Branch)
+
+vettix<-vettix%>%
+  filter(Branch != "I was never in the service" & Branch != "LEO" & Branch != "Space Force")%>%
+  filter(Status == "I am a Severely Wounded Veteran" | Status == "I am a Veteran" | Status == "I am Currently Serving")%>%
+  mutate(SSS.Survey.Response=(Who.Family=="No"|Who.Family=="Yes"|How.Social.Media.General=="No"|How.Social.Media.General=="Yes"|Allow.Knowing=="No"|Allow.Knowing=="Yes"|Suicide.Thoughts=="No"|Suicide.Thoughts=="Yes"|Suicide.Thoughts=="I prefer not to say")*1)%>%
+  mutate(VA.Survey.Response=(Registered.With.VA !=""|VA.Disability.Claim=="Yes"|VA.Disability.Claim=="No")*1)
+
+#Sanity check to ensure the filter had been successfully implemented
+table(vettix$Branch)
+#Get a count of observations that included those participants that answered SSS survey questions
+table(vettix$SSS.Survey.Response)
+
+#Get a count of demographic variables to see the range, and remove values which are not reasonable, replacing with an 'NA'
+table(vettix$Age)
+#Remove all participants with an estimated age over 100
+vettix$Age[vettix$Age>100]<-NA
+table(vettix$Age2)
+vettix$Age2[vettix$Age2>100]<-NA
+table(vettix$Yrs.Served)
+#Remove all participants with more than 65 years served
+vettix$Yrs.Served[vettix$Yrs.Served>65]<-NA
+#Replace all empty cells with an 'NA'
+vettix[vettix==""]<-NA
+
+
+#Create binned age variable 
+vettix$age.cat <- cut(vettix$Age2, breaks=c(18,25,35,45, 55, 65, 91), labels=c("18-24","25-34","35-44", "45-54", "55-64", "65-91"))
+#Sanity check of categorization
+vettix[,c(3,59)]
+
+#Create binned years served variable
+vettix$yrs.ser.cat <- cut(vettix$Yrs.Served, breaks=c(0,2,5,10,20,40,60), labels=c("0-2", "3-5", "6-10", "11-20","21-40","41-65"))
+#Sanity check of categorization
+vettix[,c(4,60)]
+
+#create factor variables
+vettix$Branch<-as.factor(vettix$Branch)
+vettix$Status<-as.factor(vettix$Status)
+vettix$Income<-as.factor(vettix$Income)
+vettix$Education<-as.factor(vettix$Education)
+vettix$Marital.Status<-as.factor(vettix$Marital.Status)
+vettix$Highest.Rank<-as.factor(vettix$Highest.Rank)
+vettix$Suicide.Thoughts[vettix$Suicide.Thoughts=="Yes"]<-"Yes."
+vettix$Suicide.Thoughts[vettix$Suicide.Thoughts=="No"]<-"No."
+vettix$Registered.With.VA[vettix$Registered.With.VA=="Yes"]<-"Yes."
+vettix$Suicide.Thoughts<-as.factor(vettix$Suicide.Thoughts)
+vettix$Registered.With.VA<-as.factor(vettix$Registered.With.VA)
+table(vettix$Suicide.Thoughts)
+
+
+#Create all other numeric dummy variables
+  #Yes will be signified by 1 and no will be signified by 0
+vettix[vettix=="Yes"]<-1
+vettix[vettix=="No"]<-0
+
+#Set all continuous variables as numeric
+vettix$Who.Family<-as.numeric(vettix$Who.Family)
+vettix$Who.Military.Friend<-as.numeric(vettix$Who.Military.Friend)
+vettix$Who.Non.Military.Friend<-as.numeric(vettix$Who.Non.Military.Friend)
+vettix$Who.Boss<-as.numeric(vettix$Who.Boss)
+vettix$Who.Chaplain<-as.numeric(vettix$Who.Chaplain)
+vettix$Who.MH.Provider<-as.numeric(vettix$Who.MH.Provider)
+vettix$Who.Other.Provider<-as.numeric(vettix$Who.Other.Provider)
+vettix$Who.VCL.SPL<-as.numeric(vettix$Who.VCL.SPL)
+vettix$Who.VSO<-as.numeric(vettix$Who.VSO)
+vettix$Who.No.One<-as.numeric(vettix$Who.No.One)
+
+vettix$How.Social.Media.General<-as.numeric(vettix$How.Social.Media.General)
+vettix$How.Social.Media.Suicide<-as.numeric(vettix$How.Social.Media.Suicide)
+vettix$How.Online.Resources.General<-as.numeric(vettix$How.Online.Resources.General)
+vettix$How.Online.Resources.Suicide<-as.numeric(vettix$How.Online.Resources.Suicide)
+vettix$How.Contact.Others.General<-as.numeric(vettix$How.Contact.Others.General)
+vettix$How.Contact.Others.Suicide<-as.numeric(vettix$How.Contact.Others.Suicide)
+vettix$How.Others.Ask.General<-as.numeric(vettix$How.Others.Ask.General)
+vettix$How.Others.Ask.Suicide<-as.numeric(vettix$How.Others.Ask.Suicide)
+vettix$How.Not.At.All<-as.numeric(vettix$How.Not.At.All)
+
+vettix$Allow.Knowing<-as.numeric(vettix$Allow.Knowing)
+vettix$Allow.Lock.Up.Guns<-as.numeric(vettix$Allow.Lock.Up.Guns)
+vettix$Allow.Gun.Access.Notification<-as.numeric(vettix$Allow.Gun.Access.Notification)
+vettix$Allow.Holding.Guns<-as.numeric(vettix$Allow.Holding.Guns)
+vettix$Allow.Providers.In.My.House<-as.numeric(vettix$Allow.Providers.In.My.House)
+vettix$Allow.App.To.Help<-as.numeric(vettix$Allow.App.To.Help)
+vettix$Allow.MH.Treatment<-as.numeric(vettix$Allow.MH.Treatment)
+vettix$Allow.Resourcing<-as.numeric(vettix$Allow.Resourcing)
+vettix$Allow.Nothing<-as.numeric(vettix$Allow.Nothing)
+
+vettix$VA.Disability.Claim<-as.numeric(vettix$VA.Disability.Claim)
+vettix$VA.Healthcare<-as.numeric(vettix$VA.Healthcare)
+vettix$VA.Education<-as.numeric(vettix$VA.Education)
+vettix$VA.Online.Records<-as.numeric(vettix$VA.Online.Records)
+vettix$VA.Housing.Services<-as.numeric(vettix$VA.Housing.Services)
+vettix$VA.Employment.Services<-as.numeric(vettix$VA.Employment.Services)
+vettix$VA.Life.Insurance<-as.numeric(vettix$VA.Life.Insurance)
+vettix$VA.Career.Resources<-as.numeric(vettix$VA.Career.Resources)
+vettix$VA.Burial.Benefits<-as.numeric(vettix$VA.Burial.Benefits)
+
+#create date and time variables
+vettix$Who.Date<-as.POSIXct(vettix$Who.Time.Stamp, format="%m/%d/%Y %H:%M", tz="UTC")
+vettix$How.Date<-as.POSIXct(vettix$How.Time.Stamp, format="%m/%d/%Y %H:%M", tz="UTC")
+vettix$Allow.Date<-as.POSIXct(vettix$Allow.Time.Stamp, format="%m/%d/%Y %H:%M", tz="UTC")
+vettix$Suicide.Thoughts.Date<-as.POSIXct(vettix$Suicide.Thoughts.Time.Stamp, format="%m/%d/%Y %H:%M", tz="UTC")
+vettix$Registered.With.VA.Date<-as.POSIXct(vettix$Registered.With.VA.Time.Stamp, format="%m/%d/%Y %H:%M", tz="UTC")
+vettix$VA.Date<-as.POSIXct(vettix$VA.Time.Stamp, format="%m/%d/%Y %H:%M", tz="UTC")
+vettix<-vettix[,-c(1,22,32,42,44,46,56)]
+```
+
+## Filter for SSS Specific Survey Columns (removing VA related questions)
+```{r, results=F, warning=F, message=F}
+#remove columns specific to VA utilization
+vettix.sss=vettix[ , c(1:39, 50, 52:55)]
+#Remove all data rows that did not participate in the SSS Survey
+vettix.sss=subset(vettix.sss, SSS.Survey.Response == 1)
+#Use only responses in which we have a complete survey
+complete.data=na.omit(vettix.sss)
+```
+
+> Total number of participants prior to removing samples that were not complete was 38,185. The complete data set, including only samples in which every variable was collected was 31,180. For use in cluster analysis and other statistical measures, we chose to proceed with the complete data set. 
+
+## Create Demographics Summary Table
+```{r, results=F, warning=F, message=F}
+library(vtable)
+#Print table statistics in R Markdown
+st(complete.data, out='browser')
+
+```
+
+## Create Summary Data 
+```{r, results=F, warning=F, message=F}
+#Create sum totals for the number of people each participants indicted they would be willing to reach out to
+
+complete.data=complete.data %>%
+  mutate(Total.who = rowSums(across(c(11:20))))
+complete.data=complete.data %>%
+  mutate(Mean.who = rowMeans(across(c(11:20))))
+
+#Create sum totals for the number of ways each participants indicted they would be willing express themselves
+complete.data=complete.data %>%
+  mutate(Total.how = rowSums(across(c(21:29))))
+complete.data=complete.data %>%
+  mutate(Mean.how = rowMeans(across(c(21:29))))
+
+#Create sum totals for the number ways participants would allow others to intervene 
+
+complete.data=complete.data %>%
+  mutate(Total.allow = rowSums(across(c(30:38))))
+complete.data=complete.data %>%
+  mutate(Mean.allow = rowMeans(across(c(30:38))))
+
+complete.data=complete.data %>%
+  mutate(mean.comm = rowMeans(across(c(48,50))))
+complete.data=complete.data %>%
+  mutate(Total.comm = rowSums(across(c(47,49))))
+```
+
+
+## Calculate Proportion of Participants who chose any multi-select option with a question
+```{r, warning=F}
+#subset data frame to only include the columns for who/how/allow multi-select responses with additional column "Suicide.Thoughts" for grouped graphing
+averages=complete.data[, c(11:39)]
+
+average.overall=averages %>% 
+  summarise_all(.funs = c(mean="mean"))
+average.overall
+
+#calculate the average percentage of participants that selected each available option by group variable "Suicide.Thoughts"
+averages=averages %>% group_by(Suicide.Thoughts) %>% 
+  summarise_all(.funs = c(mean="mean"))
+
+#transition the data from wide to long format, creating a Response and Percentage column grouped by Suicide.Thoughts
+averages <- gather(averages, Response, Percentage, Who.Family_mean:Allow.Nothing_mean, factor_key=TRUE)
+
+#Remove the _mean naming scheme added to each multi-select response during the calculation process
+averages$Response = gsub("_mean",'',averages$Response)
+```
+
+> Cross ref with Annerman et al, 2022
+> Of these disclosures, over 87% of them were informal forms of support including friends, family, and domestic partners. The remaining 13% reported to medical professionals, mental health professionals and crisis hotlines. 
+
+```{r, warning=F, message=F}
+
+#Informal=Boss, Non-mil friend, Chaplain, Mil Friend, Family
+#Formal=Other provider, VSO, VCL SPL, MH Provider 
+
+dir.comp=complete.data[, c(11:39)]
+
+dir.comp.tot=dir.comp %>% 
+  summarise_all(.funs = c(mean="mean"))
+dir.comp.tot
+
+informal=mean(0.62, 0.51, 0.18, 0.04, 0.22)
+formal=mean(0.44, 0.11, 0.26, 0.17)
+
+#Who only
+who.sums=colSums(dir.comp[sapply(dir.comp, is.numeric)])
+who.sums=as.data.frame(who.sums)
+who.sums <- tibble::rownames_to_column(who.sums, "Question")
+names(who.sums)[names(who.sums) == 'who.sums'] <- 'freq'
+who.inf=who.sums[c(1:5), ]
+who.for=who.sums[c(6:9), ]
+who.sums=who.sums[c(1:9), ]
+
+informal=sum(who.inf$freq)/sum(who.sums$freq)
+formal=sum(who.for$freq)/sum(who.sums$freq)
+
+```
+
+
+## Figure 1: If you had thoughts of suicide, whom would you trust to talk with about those thoughts? 
+```{r}
+#Create data frame containing options available for this questions
+who = averages[1:30,]
+##Remove the "who" header for the response option, and order the variables by decreasing values for graphing
+who$Response = gsub("Who.",'',who$Response)
+who = who[(order(-who$Percentage)),]
+#Turn Proportion into Percentage
+who$Percentage=(who$Percentage*100) 
+#Round percentages to one decimal point
+who$Percentage=round(who$Percentage,1)
+
+p3=ggdotchart(who, y = "Percentage", x = "Response",
+           color = "Suicide.Thoughts",     # Color by groups
+           palette = c("I prefer not to say" = "bisque3",
+                                "No." = "cadetblue4", "Yes." = "coral4"), # Custom color palette
+           sorting = "ascending",  # Sort value in descending order
+           rotate = TRUE,  # Rotate vertically
+           #position=position_dodge(0.2),
+           dot.size = 5,    # Large dot size'
+          label = round(who$Percentage,1), repel=T, # Add dot labels
+          label.rectangle=T,
+          font.label = list(color = "Suicide.Thoughts", size = 6, face="bold", vjust=-1.5), 
+          add="segments",
+           ggtheme = theme_pubr()) +
+  ylab("Percentage") +
+  ggtitle("") +
+    theme(plot.title = element_text(hjust = 0.5, size=14, face="bold")) +
+   theme(axis.title.y=element_text(face="bold"),
+            strip.text=element_text(face="bold", size=12),
+            legend.title =element_text(size=10),
+         axis.title.x =element_text(face="bold")) +
+    theme_cleveland() 
+
+p3
+
+
+#save file as png for publication
+ggsave(p3, file="who.png", height=5, width=6, dpi = 300)
+
+```
+
+## Figure 2: If you had thoughts of suicide, how would you bring it up with others?
+```{r}
+#Create data frame containing options available for this questions
+how =averages[31:57,]
+##Remove the "how" header for the response option, and order the variables by decreasing values for graphing
+how$Response = gsub("How.",'',how$Response)
+how = how[(order(-how$Percentage)),]
+#Turn Proportion into Percentage
+how$Percentage=(how$Percentage*100)
+#Round percentages to one decimal point
+how$Percentage=round(how$Percentage,1)
+
+p4=ggdotchart(how, y = "Percentage", x = "Response",
+           color = "Suicide.Thoughts",     # Color by groups
+           palette = c("I prefer not to say" = "bisque3",
+                                "No." = "cadetblue4", "Yes." = "coral4"), # Custom color palette
+           sorting = "ascending",  # Sort value in descending order
+           rotate = TRUE,  # Rotate vertically
+           #position=position_dodge(0.2),
+           dot.size = 5,    # Large dot size'
+          label = round(how$Percentage,1), repel=T, # Add dot labels
+          label.rectangle=T,
+          font.label = list(color = "Suicide.Thoughts", size = 6, face="bold", vjust=-1.5), 
+          add="segments",
+           ggtheme = theme_pubr()) +
+  ylab("Percentage") +
+  ggtitle("") +
+    theme(plot.title = element_text(hjust = 0.5, size=14, face="bold")) +
+   theme(axis.title.y=element_text(face="bold"),
+            strip.text=element_text(face="bold", size=12),
+            legend.title =element_text(size=10),
+         axis.title.x =element_text(face="bold")) +
+    theme_cleveland() 
+
+p4
+#save file as png for publication
+ggsave(p4, file="how.png", height=5, width=6, dpi = 300)
+
+```
+
+## Figure 3: If you had thoughts of suicide, what would you allow others to do to help you?
+```{r}
+#Create data frame containing options available for this questions
+allow =averages[58:84,]
+##Remove the "allow" header for the response option, and order the variables by decreasing values for graphing
+allow$Response = gsub("Allow.",'',allow$Response)
+allow = allow[(order(-allow$Percentage)),]
+#Turn Proportion into Percentage
+allow$Percentage=(allow$Percentage*100)
+#Round percentages to one decimal point
+allow$Percentage=round(allow$Percentage,1)
+
+p5=ggdotchart(allow, y = "Percentage", x = "Response",
+           color = "Suicide.Thoughts",     # Color by groups
+           palette = c("I prefer not to say" = "bisque3",
+                                "No." = "cadetblue4", "Yes." = "coral4"), # Custom color palette
+           sorting = "ascending",  # Sort value in descending order
+           rotate = TRUE,  # Rotate vertically
+           #position=position_dodge(0.2),
+           dot.size = 5,    # Large dot size'
+          label = round(allow$Percentage,1), repel=T, # Add dot labels
+          label.rectangle=T,
+          font.label = list(color = "Suicide.Thoughts", size = 6, face="bold", vjust=-1.5), 
+          add="segments",
+           ggtheme = theme_pubr()) +
+  ylab("Percentage") +
+  ggtitle("") +
+    theme(plot.title = element_text(hjust = 0.5, size=14, face="bold")) +
+   theme(axis.title.y=element_text(face="bold"),
+            strip.text=element_text(face="bold", size=12),
+            legend.title =element_text(size=10),
+         axis.title.x =element_text(face="bold")) +
+    theme_cleveland() 
+
+p5
+#save file as png for publication
+ggsave(p5, file="allow.png", height=5, width=6, dpi = 300)
+```
+
+## Multivariate Analysis
+
+```{r}
+#Allow Nothing
+nothing.glm=glm(formula = Allow.Nothing ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+summary(nothing.glm)
+nothing.glm.OR=data.frame(exp(cbind(OR = coef(nothing.glm), confint(nothing.glm))))
+nothing.glm.OR
+```
+
+```{r}
+#2=Allow.Knowing
+knowing.glm=glm(formula = Allow.Knowing ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+summary(knowing.glm)
+knowing.glm.OR=data.frame(exp(cbind(OR = coef(knowing.glm), confint(knowing.glm))))
+knowing.glm.OR
+```
+
+```{r}
+#3=Allow.Resourcing
+resourcing.glm=glm(formula = Allow.Resourcing ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+summary(resourcing.glm)
+resourcing.glm.OR=data.frame(exp(cbind(OR = coef(resourcing.glm), confint(resourcing.glm))))
+resourcing.glm.OR
+```
+
+```{r}
+#4=Allow.MH.Treatment
+MH.glm=glm(formula = Allow.MH.Treatment ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+summary(MH.glm)
+MH.glm.OR=data.frame(exp(cbind(OR = coef(MH.glm), confint(MH.glm))))
+MH.glm.OR
+```
+
+```{r}
+#5=Allow.Providers.In.My.House
+prov.glm=glm(formula = Allow.Providers.In.My.House ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+summary(prov.glm)
+prov.glm.OR=data.frame(exp(cbind(OR = coef(prov.glm), confint(prov.glm))))
+prov.glm.OR
+```
+
+```{r}
+#6=Allow.App.To.Help
+app.glm=glm(formula = Allow.App.To.Help ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+summary(app.glm)
+app.glm.OR=data.frame(exp(cbind(OR = coef(app.glm), confint(app.glm))))
+app.glm.OR
+```
+
+```{r}
+#7=Allow.Lock.Up.Guns
+lockguns.glm=glm(formula = Allow.Lock.Up.Guns ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+summary(lockguns.glm)
+lockguns.glm.OR=data.frame(exp(cbind(OR = coef(lockguns.glm), confint(lockguns.glm))))
+lockguns.glm.OR
+```
+
+```{r}
+#8=Allow.Gun.Access.Notification
+gunnot.glm=glm(formula = Allow.Gun.Access.Notification ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+summary(gunnot.glm)
+gunnot.glm.OR=data.frame(exp(cbind(OR = coef(gunnot.glm), confint(gunnot.glm))))
+gunnot.glm.OR
+```
+
+```{r}
+#9=Allow.Holding.Guns
+gunhold.glm=glm(formula = Allow.Holding.Guns ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+summary(gunhold.glm)
+gunhold.glm.OR=data.frame(exp(cbind(OR = coef(gunhold.glm), confint(gunhold.glm))))
+gunhold.glm.OR
+
+```
+
+```{r}
+OR.combined=rbind(nothing.glm.OR, knowing.glm.OR, resourcing.glm.OR, MH.glm.OR, prov.glm.OR, app.glm.OR, lockguns.glm.OR, gunnot.glm.OR, gunhold.glm.OR)
+OR.combined= OR.combined %>% mutate_if(is.numeric, round, digits=2)
+OR.combined$stats <- paste(OR.combined$OR,"(",OR.combined$X2.5..,"-", OR.combined$X97.5.., ")")
+write.csv(OR.combined, "OR.combined.csv", row.names=T)
+
+```
