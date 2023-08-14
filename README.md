@@ -1,13 +1,13 @@
 # Vet-Communication-Intervention
 
 ## Suicide risk communication and intervention preferences for veterans and service members.
-##### Abby E. Beatty[^1], John Richardson[^1], Sonja V. Batten[^1], Steven Weintraub[^2], Karen Hogan[^2], Keith Hotle[^1] 
+##### Abby E. Beatty<sup>1</sup>, John Richardson<sup>1</sup>, Sonja V. Batten<sup>1</sup>, Steven Weintraub<sup>2</sup>, Karen Hogan<sup>2</sup>, Keith Hotle<sup>1</sup> 
 
 ###### Currently under review at *Frontiers Public Health- Public Mental Health* as a Brief Reserach Report.
 
 ##### A Collaborative Effort Between: <br/>
 ###### <sup>1</sup>Stop Soldier Suicide, P.O. Box 110605, Durham, NC 27709, USA  
-######   [^2]Veteran Tickets Foundation, 1255 W. Rio Salado Pkwy. Ste 209 Tempe, AZ 85281, USA
+###### <sup>2</sup>Veteran Tickets Foundation, 1255 W. Rio Salado Pkwy. Ste 209 Tempe, AZ 85281, USA
 
 ### Abstract:
 
