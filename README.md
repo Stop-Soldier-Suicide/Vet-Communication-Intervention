@@ -18,12 +18,12 @@ Despite the investment of public resources to fight staggering suicide rates amo
 
 | Document Type     | Description                                                   | Link  |
 | ----------------- |---------------------------------------------------------------| -----:|
-| Deidentified Data | All data points used in analysis for reproduction of results. | [SSS_Poll_wVAQuestions.csv](SSS_Poll_wVAQuestions.csv) |
-| R Markdown Code   | R code used to produce results presented in article.          | XX |
-| R Markdown Output | R Markdown output file including code and resulting restuls.  | [HTML]() <br/> [PDF]() |
+| Deidentified Data | All data points used in analysis for reproduction of results. | [CSV File](SSS_Poll_wVAQuestions.csv) |
+| R Markdown Code   | R code used to produce results presented in article.          | [Markdown](VetTix_GitHub.Rmd) |
+| R Markdown Output | R Markdown output file including code and resulting restuls.  | [HTML](VetTix_GitHub.html) <br/> [PDF](VetTix_GitHub.pdf) |
 
 
-> In order to reporduce the results presented in the research article and [R Markdown Output File](), download the [Deidentified Data](SSS_Poll_wVAQuestions.csv) and the [R Markdown Code]() into the same file location. Open the R Markdown file, and click the "Knit" button on the top panel. This will create an R Markdown Output file as presented here. Alternatively, the raw code is pasted below for your convenience, and can be pasted into any R platform. Please note that the figures produced in this code were combined and formatted using "BioRender". No data was altered in the process. 
+> In order to reporduce the results presented in the research article and [R Markdown Output File](VetTix_GitHub.pdf), download the [Deidentified Data](SSS_Poll_wVAQuestions.csv) and the [R Markdown Code](VetTix_GitHub.Rmd) into the same file location. Open the R Markdown file, and click the "Knit" button on the top panel. This will create an R Markdown Output file as presented here. Alternatively, the raw code is pasted below for your convenience, and can be pasted into any R platform. Please note that the figures produced in this code were combined and formatted using "BioRender". No data was altered in the process. 
 
 ## R Code for Analysis (raw code)
 
