@@ -21,3 +21,15 @@ Despite the investment of public resources to fight staggering suicide rates amo
 | Deidentified Data | All data points used in analysis for reproduction of results. | [SSS_Poll_wVAQuestions.csv](SSS_Poll_wVAQuestions.csv) |
 | R Markdown Code   | R code used to produce results presented in article.          | XX |
 | R Markdown Output | R Markdown output file including code and resulting restuls.  | XX |
+
+
+> In order to reporduce the results presented in the research article and [R Markdown Output File](), download the [Deidentified Data](SSS_Poll_wVAQuestions.csv) and the [R Markdown Code]() into the same file location. Open the R Markdown file, and click the "Knit" button on the top panel. This will create an R Markdown Output file as presented here. Alternatively, the raw code is pasted below for your convenience, and can be pasted into any R platform.
+
+
+```ruby
+
+
+
+
+
+```
