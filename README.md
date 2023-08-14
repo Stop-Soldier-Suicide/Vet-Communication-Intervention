@@ -27,7 +27,7 @@ Despite the investment of public resources to fight staggering suicide rates amo
 
 ## R Code for Analysis (raw code)
 
-```{ruby}
+```ruby
 ##Install Packages and Load Dataset
 
 library(dataMaid)
