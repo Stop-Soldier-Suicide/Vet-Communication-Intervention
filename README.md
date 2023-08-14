@@ -6,8 +6,8 @@
 ###### Currently under review at *Frontiers Public Health- Public Mental Health* as a Brief Reserach Report.
 
 ##### A Collaborative Effort Between: <br/>
-###### [^1]Stop Soldier Suicide, P.O. Box 110605, Durham, NC 27709, USA <br/>
-###### [^2]Veteran Tickets Foundation, 1255 W. Rio Salado Pkwy. Ste 209 Tempe, AZ 85281, USA
+###### [^1]Stop Soldier Suicide, P.O. Box 110605, Durham, NC 27709, USA  
+######   [^2]Veteran Tickets Foundation, 1255 W. Rio Salado Pkwy. Ste 209 Tempe, AZ 85281, USA
 
 ### Abstract:
 
