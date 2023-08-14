@@ -16,7 +16,7 @@ Despite the investment of public resources to fight staggering suicide rates amo
 
 ### Files: 
 
-| File              | Description                                                   | Link  |
+| Document Type     | Description                                                   | Link  |
 | ----------------- |---------------------------------------------------------------| -----:|
 | Deidentified Data | All data points used in analysis for reproduction of results. | XX |
 | R Markdown Code   | R code used to produce results presented in article.          | XX |
