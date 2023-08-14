@@ -18,6 +18,6 @@ Despite the investment of public resources to fight staggering suicide rates amo
 
 | Document Type     | Description                                                   | Link  |
 | ----------------- |---------------------------------------------------------------| -----:|
-| Deidentified Data | All data points used in analysis for reproduction of results. | SSS_Poll_wVAQuestions.csv |
+| Deidentified Data | All data points used in analysis for reproduction of results. | [](SSS_Poll_wVAQuestions.csv) |
 | R Markdown Code   | R code used to produce results presented in article.          | XX |
 | R Markdown Output | R Markdown output file including code and resulting restuls.  | XX |
