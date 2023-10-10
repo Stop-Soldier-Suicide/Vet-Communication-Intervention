@@ -19,11 +19,11 @@ Despite the investment of public resources to fight staggering suicide rates amo
 | Document Type     | Description                                                   | Link  |
 | ----------------- |---------------------------------------------------------------| -----:|
 | Deidentified Data | All data points used in analysis for reproduction of results. | [CSV File](SSS_Poll_wVAQuestions.csv) |
-| R Markdown Code   | R code used to produce results presented in article.          | [Markdown](VetTix_GitHub.Rmd) |
-| R Markdown Output | R Markdown output file including code and resulting restuls.  | [HTML](VetTix_GitHub.html) <br/> [PDF](VetTix_GitHub.pdf) |
+| R Markdown Code   | R code used to produce results presented in article.          | [Markdown](VetTix_GitHub_R1.Rmd) |
+| R Markdown Output | R Markdown output file including code and resulting restuls.  | [HTML](VetTix_GitHub_R1.html) <br/> [PDF](VetTix_GitHub_R1.pdf) |
 
 
-> In order to reporduce the results presented in the research article and [R Markdown Output File](VetTix_GitHub.pdf), download the [Deidentified Data](SSS_Poll_wVAQuestions.csv) and the [R Markdown Code](VetTix_GitHub.Rmd) into the same file location. Open the R Markdown file, and click the "Knit" button on the top panel. This will create an R Markdown Output file as presented here. Alternatively, the raw code is pasted below for your convenience, and can be pasted into any R platform.
+> In order to reporduce the results presented in the research article and [R Markdown Output File](VetTix_GitHub_R1.pdf), download the [Deidentified Data](SSS_Poll_wVAQuestions.csv) and the [R Markdown Code](VetTix_GitHub_R1.Rmd) into the same file location. Open the R Markdown file, and click the "Knit" button on the top panel. This will create an R Markdown Output file as presented here. Alternatively, the raw code is pasted below for your convenience, and can be pasted into any R platform.
 > The HTML file is searchable and viewer friendly, however when you click on the file like, you will need to download the file to view it. The preview displays HTML code rather than the code output by default.
 > Please note that the figures produced in this code were combined and formatted using "BioRender". No data was altered in the process. 
 
@@ -378,57 +378,69 @@ ggsave(p5, file="allow.png", height=5, width=6, dpi = 300)
 
 #Multivariate Analysis
 #Allow Nothing
-nothing.glm=glm(formula = Allow.Nothing ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+nothing.glm=glm(formula = Allow.Nothing ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps") + relevel(Education, ref="High School or equivalent") + relevel(Income, ref="less than $25,000"), data=complete.data, family="binomial")
+
 summary(nothing.glm)
 nothing.glm.OR=data.frame(exp(cbind(OR = coef(nothing.glm), confint(nothing.glm))))
 nothing.glm.OR
 
 
 #2=Allow.Knowing
-knowing.glm=glm(formula = Allow.Knowing ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+knowing.glm=glm(formula = Allow.Knowing ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps") + relevel(Education, ref="High School or equivalent") + relevel(Income, ref="less than $25,000"), data=complete.data, family="binomial")
+
 summary(knowing.glm)
 knowing.glm.OR=data.frame(exp(cbind(OR = coef(knowing.glm), confint(knowing.glm))))
 knowing.glm.OR
 
 
 #3=Allow.Resourcing
-resourcing.glm=glm(formula = Allow.Resourcing ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+resourcing.glm=glm(formula = Allow.Resourcing ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps") + relevel(Education, ref="High School or equivalent") + relevel(Income, ref="less than $25,000"), data=complete.data, family="binomial")
+
 summary(resourcing.glm)
 resourcing.glm.OR=data.frame(exp(cbind(OR = coef(resourcing.glm), confint(resourcing.glm))))
 resourcing.glm.OR
 
+
 #4=Allow.MH.Treatment
-MH.glm=glm(formula = Allow.MH.Treatment ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+MH.glm=glm(formula = Allow.MH.Treatment ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps") + relevel(Education, ref="High School or equivalent") + relevel(Income, ref="less than $25,000"), data=complete.data, family="binomial")
+
 summary(MH.glm)
 MH.glm.OR=data.frame(exp(cbind(OR = coef(MH.glm), confint(MH.glm))))
 MH.glm.OR
 
+
 #5=Allow.Providers.In.My.House
-prov.glm=glm(formula = Allow.Providers.In.My.House ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+prov.glm=glm(formula = Allow.Providers.In.My.House ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps") + relevel(Education, ref="High School or equivalent") + relevel(Income, ref="less than $25,000"), data=complete.data, family="binomial")
+
 summary(prov.glm)
 prov.glm.OR=data.frame(exp(cbind(OR = coef(prov.glm), confint(prov.glm))))
 prov.glm.OR
 
+
 #6=Allow.App.To.Help
-app.glm=glm(formula = Allow.App.To.Help ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+app.glm=glm(formula = Allow.App.To.Help ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps") + relevel(Education, ref="High School or equivalent") + relevel(Income, ref="less than $25,000"), data=complete.data, family="binomial")
+
 summary(app.glm)
 app.glm.OR=data.frame(exp(cbind(OR = coef(app.glm), confint(app.glm))))
 app.glm.OR
 
 #7=Allow.Lock.Up.Guns
-lockguns.glm=glm(formula = Allow.Lock.Up.Guns ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+lockguns.glm=glm(formula = Allow.Lock.Up.Guns ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps") + relevel(Education, ref="High School or equivalent") + relevel(Income, ref="less than $25,000"), data=complete.data, family="binomial")
+
 summary(lockguns.glm)
 lockguns.glm.OR=data.frame(exp(cbind(OR = coef(lockguns.glm), confint(lockguns.glm))))
 lockguns.glm.OR
 
 #8=Allow.Gun.Access.Notification
-gunnot.glm=glm(formula = Allow.Gun.Access.Notification ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+gunnot.glm=glm(formula = Allow.Gun.Access.Notification ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps") + relevel(Education, ref="High School or equivalent") + relevel(Income, ref="less than $25,000"), data=complete.data, family="binomial")
+
 summary(gunnot.glm)
 gunnot.glm.OR=data.frame(exp(cbind(OR = coef(gunnot.glm), confint(gunnot.glm))))
 gunnot.glm.OR
 
 #9=Allow.Holding.Guns
-gunhold.glm=glm(formula = Allow.Holding.Guns ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps"), data=complete.data, family="binomial")
+gunhold.glm=glm(formula = Allow.Holding.Guns ~ relevel(Suicide.Thoughts, ref="No.") + relevel(age.cat, ref="65-91") + relevel(Marital.Status, ref="Single ") + relevel(Status, ref="I am Currently Serving") + relevel(Branch, ref="Marine Corps") + relevel(Education, ref="High School or equivalent") + relevel(Income, ref="less than $25,000"), data=complete.data, family="binomial")
+
 summary(gunhold.glm)
 gunhold.glm.OR=data.frame(exp(cbind(OR = coef(gunhold.glm), confint(gunhold.glm))))
 gunhold.glm.OR
